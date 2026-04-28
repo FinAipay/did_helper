@@ -5,8 +5,12 @@ license: MIT
 compatibility: |
   Requires 'did_helper' CLI in PATH.
   Install: 
-    git clone https://github.com/finai-network/did_helper.git
-    cd did_helper && make build && sudo cp did_helper /usr/local/bin/
+    Release：
+        #download newest version
+        https://github.com/xdevplatform/xurl/releases
+    Manual:
+        git clone https://github.com/finai-network/did_helper.git
+        cd did_helper && make build && sudo cp did_helper /usr/local/bin/
   Verify: did_helper help
   OS: Linux, macOS, Windows (PowerShell/CMD)
 ---
