@@ -4,8 +4,10 @@ description: CLI tool for FinAI DID, keys, tickets, API keys. Use for decentrali
 license: MIT
 compatibility: |
   Requires 'did_helper' CLI in PATH.
-  Install: https://github.com/FinAI/did-helper
-  Verify: did_helper --version
+  Install: 
+    git clone https://github.com/finai-network/did_helper.git
+    cd did_helper && make build && sudo cp did_helper /usr/local/bin/
+  Verify: did_helper help
   OS: Linux, macOS, Windows (PowerShell/CMD)
 ---
 

@@ -18,8 +18,7 @@ var rootCmd = &cobra.Command{
 - Managing DID documents
 - Managing tickets and API keys
 - Generating and managing crypto wallets (ETH, Solana, X25519)
-
-All data is stored in ~/.did_helper directory with DID-based structure.`,
+`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Initialize storage manager
 		sm, err := storage.NewDIDStorageManager()

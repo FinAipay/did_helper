@@ -18,18 +18,18 @@ import (
 )
 
 var (
-	didParam           string
-	didEntityType      string
-	didEntityId        string
-	didExpectedHL      string
-	original           bool
-	didUpdateFile      string
-	didAddKeys         []string
-	didRevokeKeys      []string
-	didAddServices     []string
-	didRemoveServices  []string
-	didUpdateMetadata  string
-	didForce           bool
+	didParam          string
+	didEntityType     string
+	didEntityId       string
+	didExpectedHL     string
+	original          bool
+	didUpdateFile     string
+	didAddKeys        []string
+	didRevokeKeys     []string
+	didAddServices    []string
+	didRemoveServices []string
+	didUpdateMetadata string
+	didForce          bool
 )
 
 // didCmd is the DID management command
@@ -133,10 +133,6 @@ Example:
 			fmt.Printf("DID: %s\n", doc.ID)
 			fmt.Printf("Entity Type: %s\n", didEntityType)
 			fmt.Printf("Entity ID: %s\n", didEntityId)
-
-			fmt.Println("\n📁 Storage location:")
-			fmt.Printf("   ~/.did_helper/%s/\n", didToDirName(doc.ID))
-
 			fmt.Println("\n💡 Tips:")
 			fmt.Println("  - View DID: did_helper did show --did " + doc.ID)
 			fmt.Println("  - List all DIDs: did_helper did list")
@@ -642,10 +638,10 @@ Example:
 			fmt.Printf("⚠️  WARNING: Deactivating DID is IRREVERSIBLE!\n")
 			fmt.Printf("DID: %s\n\n", did)
 			fmt.Print("Are you sure? Type 'yes' to confirm: ")
-			
+
 			var confirmation string
 			fmt.Scanln(&confirmation)
-			
+
 			if strings.ToLower(confirmation) != "yes" {
 				return fmt.Errorf("deactivation cancelled")
 			}
@@ -707,9 +703,9 @@ func init() {
 	didQueryCmd.Flags().BoolVarP(&original, "original", "o", false, "Original output")
 	didVerifyCmd.Flags().StringVarP(&didParam, "did", "d", "", "DID identifier to verify")
 	didVerifyCmd.Flags().StringVarP(&didExpectedHL, "hl", "l", "", "Expected hashlink for comparison")
-	
+
 	didReputationCmd.Flags().StringVarP(&didParam, "did", "d", "", "DID identifier (default: from config)")
-	
+
 	didUpdateCmd.Flags().StringVarP(&didParam, "did", "d", "", "DID identifier (default: from config)")
 	didUpdateCmd.Flags().StringVarP(&didUpdateFile, "request-file", "f", "", "JSON file containing update request")
 	didUpdateCmd.Flags().StringArrayVar(&didAddKeys, "add-key", []string{}, "Add verification method (JSON format, can be used multiple times)")
@@ -717,10 +713,11 @@ func init() {
 	didUpdateCmd.Flags().StringArrayVar(&didAddServices, "add-service", []string{}, "Add service endpoint (JSON format, can be used multiple times)")
 	didUpdateCmd.Flags().StringArrayVar(&didRemoveServices, "remove-service", []string{}, "Remove service endpoint by ID (can be used multiple times)")
 	didUpdateCmd.Flags().StringVar(&didUpdateMetadata, "update-metadata", "", "Update metadata (JSON format)")
-	
+
 	didDeactivateCmd.Flags().StringVarP(&didParam, "did", "d", "", "DID identifier (default: from config)")
 	didDeactivateCmd.Flags().BoolVar(&didForce, "force", false, "Skip confirmation prompt")
 }
+
 // ============================================================================
 // Hashlink Calculation Helper Functions
 // ============================================================================

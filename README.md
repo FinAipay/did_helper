@@ -29,8 +29,8 @@ FinAI DID Helper is a powerful CLI tool for managing Decentralized Identifiers (
 
 ```bash
 # Clone repository
-git clone https://github.com/finai-network/did-helper.git
-cd did-helper
+git clone https://github.com/finai-network/did_helper.git
+cd did_helper
 
 # Build binary
 make build
@@ -58,35 +58,35 @@ go install .
 
 ```bash
 # Generate Ethereum key
-./did_helper key generate --type ethereum --password "your_secure_password"
+did_helper key generate --type ethereum --password "your_secure_password"
 
 # Generate Solana key
-./did_helper key generate --type solana
+did_helper key generate --type solana
 
 # Generate X25519 key (for encryption)
-./did_helper key generate --type x25519
+did_helper key generate --type x25519
 ```
 
 #### 2. Create DID Document
 
 ```bash
 # Create DID for an agent
-./did_helper did create --entity-type agents --entity-id 0xYourAddress
+did_helper did create --entity-type agents --entity-id 0xYourAddress
 
 # Create DID for a user
-./did_helper did create --entity-type users --entity-id 0xYourAddress
+did_helper did create --entity-type users --entity-id 0xYourAddress
 ```
 
 #### 3. Authenticate & Get Ticket
 
 ```bash
 # Generate challenge and sign (automatic if key exists locally)
-./did_helper ticket challenge --did did:finai:agents:0xYourAddress
+did_helper ticket challenge --did did:finai:agents:0xYourAddress
 
 # If using browser wallet, open the generated HTML file on your desktop
 
 # Verify signature and obtain ticket
-./did_helper ticket verify --did did:finai:agents:0xYourAddress \
+did_helper ticket verify --did did:finai:agents:0xYourAddress \
   --challenge "challenge_string" \
   --signature "0xsignature"
 ```
@@ -95,14 +95,14 @@ go install .
 
 ```bash
 # Create API key
-./did_helper apikey create --did did:finai:agents:0xYourAddress \
+did_helper apikey create --did did:finai:agents:0xYourAddress \
   --service-name my-service
 
 # List API keys
-./did_helper apikey list --did did:finai:agents:0xYourAddress
+did_helper apikey list --did did:finai:agents:0xYourAddress
 
 # Revoke API key
-./did_helper apikey revoke --did did:finai:agents:0xYourAddress \
+did_helper apikey revoke --did did:finai:agents:0xYourAddress \
   --api-key pk_live_xxx
 ```
 
