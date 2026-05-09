@@ -7,7 +7,7 @@ compatibility: |
   Install: 
     Release：
         #download newest version
-        https://github.com/xdevplatform/xurl/releases
+        https://github.com/FinAipay/did_helper/releases
     Manual:
         git clone https://github.com/finai-network/did_helper.git
         cd did_helper && make build && sudo cp did_helper /usr/local/bin/
