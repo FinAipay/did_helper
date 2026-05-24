@@ -437,6 +437,33 @@ func (s *DIDStorageManager) InitializeDefaultConfig() error {
 		config.API = "http://localhost:8080"
 		config.AmountLimit = "1 USDC"
 		config.ChallengeAmount = "0.5 USDC"
+		
+		// Initialize x402 configuration
+		config.X402API = "https://x402.finai.network/testnet/base-sepolia"
+		config.DefaultNetwork = "base-sepolia"
+		
+		// Initialize EIP-712 networks
+		config.EIP712Networks = map[string]models.EIP712NetworkConfig{
+			"base-sepolia": {
+				Name:              "FinAI Payment",
+				Version:           "1",
+				ChainID:           84532,
+				VerifyingContract: "0x0000000000000000000000000000000000000000",
+			},
+			"ethereum": {
+				Name:              "FinAI Payment",
+				Version:           "1",
+				ChainID:           1,
+				VerifyingContract: "0x0000000000000000000000000000000000000000",
+			},
+		}
+		
+		// Initialize payment confirmation
+		config.PaymentConfirmation = models.PaymentConfirmationConfig{
+			Enabled:       true,
+			USDCThreshold: "100.00",
+		}
+		
 		return s.SaveConfig(config)
 	}
 

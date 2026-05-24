@@ -73,6 +73,14 @@ IF output CONTAINS "missing authorization header" OR similar auth error:
 - `authentication required`
 - `invalid ticket`
 - `ticket expired`
+- `wallet not found`                    # x402: ETH wallet missing
+- `eth wallet required`                 # x402: Only ETH supported
+- `solana not supported`                # x402: Solana wallets rejected
+- `insufficient balance`                # x402: Not enough funds
+- `invalid signature`                   # x402: EIP-712 signature failed
+- `eip-712 signing failed`             # x402: Signing process error
+- `chain not supported`                 # x402: Network not configured
+- `payment timeout`                     # x402: Transaction timeout
 
 **Agent behavior:**
 1. Execute user command
@@ -122,6 +130,7 @@ def validate_command(cmd_parts):
 | **DID update**     | "update DID", "add key", "add service", "modify DID"       | Workflow E (auto-detect ticket)         |
 | **Reputation**     | "reputation", "score", "trust score"                       | Workflow F (auto-detect ticket)         |
 | **DID deactivate** | "deactivate DID", "disable DID", "delete DID"              | Workflow G (auto-detect + irreversible) |
+| **x402支付**       | "payment", "pay", "x402", "order", "create payment"        | Workflow H (auto-detect + wallet check) |
 | **apikey** (any)   | "API key", "create API key", "list API keys", "revoke"     | **FORBIDDEN** → manual instruction      |
 | **Other**          | Not matching above                                         | Ask user to clarify                     |
 
@@ -460,6 +469,154 @@ CASE other error:
 
 ---
 
+### Workflow H: x402 Payment (Auto-detect Ticket + Wallet Validation)
+
+**PREREQUISITES:**
+- Valid DID must exist
+- ETH wallet must be imported (Solana NOT supported)
+- Valid ticket (auto-detected)
+- Payment confirmation for high-value transactions (configurable threshold)
+
+**TRIGGERS:**
+- "create payment", "pay", "x402", "order list", "process payment"
+
+**Step H1: Validate Prerequisites**
+
+```python
+def validate_x402_prerequisites(did):
+    # Check DID exists
+    if not did_exists(did):
+        raise Error("DID not found. Please create DID first.")
+    
+    # Extract entity ID from DID
+    entity_id = extract_entity_id(did)
+    
+    # Check ETH wallet exists in import directory
+    if not eth_wallet_exists(entity_id):
+        raise Error(f"ETH wallet not found for {entity_id}. Run: did_helper key generate --type ethereum")
+    
+    # Verify it's ETH type (not Solana/X25519)
+    if not is_eth_wallet(entity_id):
+        raise Error("Only ETH wallets supported for x402. Solana wallets cannot be used.")
+```
+
+**Step H2: Execute Command & Auto-detect Auth**
+
+```python
+result = execute_did_helper_command(command, did)
+
+# Check for auth errors
+if contains_auth_error(result):
+    workflow_c_authenticate(did)
+    retry_command()
+```
+
+**Step H3: Handle Specific Operations**
+
+| Operation | Command | Special Handling |
+|-----------|---------|------------------|
+| Create Payment | `x402 payment create --did <DID> --amount <AMT> --recipient <ADDR>` | Save order to local storage |
+| List Orders | `x402 order list --did <DID> [--status pending] [--limit 10]` | Format table output |
+| Show Order | `x402 order show --did <DID> --order-id <ID>` | Display full details |
+| Pay | `x402 pay --did <DID> --order-id <ID>` | EIP-712 signing + payment confirmation |
+| Status | `x402 order status --did <DID> --order-id <ID>` | Query current status |
+| Retry | `x402 order retry --did <DID> --order-id <ID>` | Retry failed payment |
+| Cancel | `x402 order cancel --did <DID> --order-id <ID>` | Requires confirmation |
+
+**Step H4: EIP-712 Signing Flow (for `x402 pay`)**
+
+```
+1. Get signing requirements from API: GET /order/{orderId}/signing-requirements
+2. Load ETH private key from import directory (keystore.json + password.txt)
+3. Sign using EIP-712 standard with configured network domain
+4. Submit signature: POST /order/{orderId}/process-payment
+5. Verify transaction status and update local order cache
+```
+
+**Step H5: Payment Confirmation for High-Value Transactions**
+
+```
+IF config.payment_confirmation.enabled == true:
+    Parse order amount
+    IF amount > config.payment_confirmation.usdc_threshold:
+        Output: "⚠️ HIGH VALUE PAYMENT WARNING"
+        Output: "Amount: {amount} USDC (threshold: {threshold})"
+        Output: "Type EXACTLY: CONFIRM PAYMENT {order_id} to proceed"
+        
+        WAIT for user input
+        
+        IF input != f"CONFIRM PAYMENT {order_id}":
+            Abort payment
+        ELSE:
+            Continue with EIP-712 signing
+```
+
+**Error Patterns to Detect (case-insensitive):**
+- `missing authorization header`
+- `unauthorized`
+- `ticket not found`
+- `wallet not found`
+- `eth wallet required`
+- `solana not supported`
+- `insufficient balance`
+- `invalid signature`
+- `eip-712 signing failed`
+- `chain not supported`
+- `payment timeout`
+- `authentication required`
+- `invalid ticket`
+- `ticket expired`
+
+**Max retries: 2** (excluding ticket-triggered retry)
+
+**Configuration Notes:**
+- Default x402 API: `https://x402.finai.network/testnet/base-sepolia`
+- Default network: `base-sepolia` (Chain ID: 84532)
+- Payment confirmation threshold: `100.00 USDC` (configurable)
+- Supported networks: `base-sepolia`, `ethereum`
+
+---
+
+## Quick Reference: x402 Payment Examples
+
+```bash
+# Create payment order
+did_helper x402 payment create \
+  --did did:finai:users:0x123... \
+  --amount "1.00" \
+  --recipient "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+
+# List orders
+did_helper x402 order list --did did:finai:users:0x123...
+
+# Show order details
+did_helper x402 order show \
+  --did did:finai:users:0x123... \
+  --order-id 550e8400-e29b-41d4-a716-446655440000
+
+# Execute payment (with auto EIP-712 signing)
+did_helper x402 pay \
+  --did did:finai:users:0x123... \
+  --order-id 550e8400-e29b-41d4-a716-446655440000
+
+# Check order status
+did_helper x402 order status \
+  --did did:finai:users:0x123... \
+  --order-id 550e8400-e29b-41d4-a716-446655440000
+
+# Retry failed order
+did_helper x402 order retry \
+  --did did:finai:users:0x123... \
+  --order-id 550e8400-e29b-41d4-a716-446655440000
+
+# Cancel pending order
+did_helper x402 order cancel \
+  --did did:finai:users:0x123... \
+  --order-id 550e8400-e29b-41d4-a716-446655440000
+```
+
+---
+
 ## Generic Command Execution Template
 
 **MUST use this pattern for ALL did_helper executions:**
@@ -476,7 +633,15 @@ def execute_did_helper_command(command, did=None):
         "ticket not found",
         "authentication required",
         "invalid ticket",
-        "ticket expired"
+        "ticket expired",
+        "wallet not found",
+        "eth wallet required",
+        "solana not supported",
+        "insufficient balance",
+        "invalid signature",
+        "eip-712 signing failed",
+        "chain not supported",
+        "payment timeout"
     ]
     
     output_lower = (result.stdout + result.stderr).lower()

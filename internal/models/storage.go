@@ -11,6 +11,12 @@ type Config struct {
 	LastVerify      string        `json:"last_verify"`
 	AmountLimit     string        `json:"amount_limit"`
 	ChallengeAmount string        `json:"challage_amount"`
+	
+	// X402 Payment Configuration
+	X402API              string                      `json:"x402_api,omitempty"`
+	EIP712Networks       map[string]EIP712NetworkConfig `json:"eip712_networks,omitempty"`
+	DefaultNetwork       string                      `json:"default_network,omitempty"`
+	PaymentConfirmation  PaymentConfirmationConfig   `json:"payment_confirmation,omitempty"`
 }
 
 // DefaultConfig represents default DID configuration

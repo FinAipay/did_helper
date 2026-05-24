@@ -316,3 +316,125 @@ func (c *HTTPClient) DeleteWithTicket(url string, ticket string) (int, string, e
 
 	return resp.StatusCode, string(respBody), nil
 }
+
+// GetWithTicketAndDID sends a GET request with ticket and DID headers
+func (c *HTTPClient) GetWithTicketAndDID(url string, ticket string, did string) (int, string, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to create request: %w", err)
+	}
+
+	c.addHeaders(req)
+	req.Header.Set("ticket", ticket)
+	req.Header.Set("X-DID", did)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to read response: %w", err)
+	}
+
+	return resp.StatusCode, string(respBody), nil
+}
+
+// PostWithTicketAndDID sends a POST request with ticket and DID headers
+func (c *HTTPClient) PostWithTicketAndDID(url string, body interface{}, ticket string, did string) (int, string, error) {
+	var reader io.Reader
+
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return 0, "", fmt.Errorf("Failed to serialize JSON: %w", err)
+		}
+		reader = bytes.NewBuffer(jsonData)
+	}
+
+	req, err := http.NewRequest("POST", url, reader)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to create request: %w", err)
+	}
+
+	c.addHeaders(req)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("ticket", ticket)
+	req.Header.Set("X-DID", did)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to read response: %w", err)
+	}
+
+	return resp.StatusCode, string(respBody), nil
+}
+
+// PutWithTicketAndDID sends a PUT request with ticket and DID headers
+func (c *HTTPClient) PutWithTicketAndDID(url string, body interface{}, ticket string, did string) (int, string, error) {
+	var reader io.Reader
+
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return 0, "", fmt.Errorf("Failed to serialize JSON: %w", err)
+		}
+		reader = bytes.NewBuffer(jsonData)
+	}
+
+	req, err := http.NewRequest("PUT", url, reader)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to create request: %w", err)
+	}
+
+	c.addHeaders(req)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("ticket", ticket)
+	req.Header.Set("X-DID", did)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to read response: %w", err)
+	}
+
+	return resp.StatusCode, string(respBody), nil
+}
+
+// DeleteWithTicketAndDID sends a DELETE request with ticket and DID headers
+func (c *HTTPClient) DeleteWithTicketAndDID(url string, ticket string, did string) (int, string, error) {
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to create request: %w", err)
+	}
+
+	c.addHeaders(req)
+	req.Header.Set("ticket", ticket)
+	req.Header.Set("X-DID", did)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, "", fmt.Errorf("Failed to read response: %w", err)
+	}
+
+	return resp.StatusCode, string(respBody), nil
+}
